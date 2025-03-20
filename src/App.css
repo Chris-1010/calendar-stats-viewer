@@ -1,0 +1,88 @@
+.login-container {
+	max-width: 400px;
+	margin: 0 auto;
+	padding: 20px;
+	text-align: center;
+}
+
+.calendar-container {
+	max-width: 800px;
+	margin: 0 auto;
+	padding: 20px;
+}
+
+.google-auth-buttons {
+	margin: 20px 0;
+}
+
+.auth-button {
+	padding: 10px 15px;
+	background-color: #4285f4;
+	color: white;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+	font-size: 16px;
+}
+
+.auth-button.signout {
+	background-color: #db4437;
+}
+
+.search-container {
+	margin: 20px 0;
+}
+
+.search-container form {
+	display: flex;
+	gap: 10px;
+}
+
+.search-container input {
+	flex-grow: 1;
+	padding: 8px;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+}
+
+.search-container button {
+	padding: 8px 16px;
+	background-color: #4285f4;
+	color: white;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+}
+
+.events-list {
+	list-style: none;
+	padding: 0;
+}
+
+.event-item {
+	padding: 15px;
+	margin-bottom: 10px;
+	border: 1px solid #eee;
+	border-radius: 4px;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.event-summary {
+	font-weight: bold;
+	margin-bottom: 5px;
+}
+
+.event-stats {
+	margin: 20px 0;
+	padding: 15px;
+	background-color: #1f0000;
+	border-radius: 4px;
+}
+
+.error {
+	color: #db4437;
+	padding: 10px;
+	border: 1px solid #db4437;
+	border-radius: 4px;
+	background-color: #fce8e6;
+}
