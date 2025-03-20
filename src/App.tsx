@@ -42,7 +42,7 @@ function App() {
 				</form>
 			</div>
 
-			<CalendarEvents searchEventName={searchSubmitted} />
+			<CalendarEvents searchQuery={searchSubmitted} />
 		</main>
 	);
 }

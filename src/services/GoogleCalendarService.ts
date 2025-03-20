@@ -5,6 +5,20 @@ const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID as string;
 const DISCOVERY_DOC = "https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest";
 const SCOPES = "https://www.googleapis.com/auth/calendar.readonly";
 
+function calculateDuration(start: string, end: string): { hours: number, minutes: number } {
+	// Parse the ISO datetime strings into Date objects
+	const startDate = new Date(start);
+	const endDate = new Date(end);
+	
+	// Calculate difference in milliseconds
+	const diffMs = endDate.getTime() - startDate.getTime();
+	
+	// Convert to hours and minutes
+	const hours = Math.floor(diffMs / (1000 * 60 * 60));
+	const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+	
+	return { hours, minutes };
+  }
 class GoogleCalendarService {
 	private gapiInited = false;
 	private gisInited = false;
@@ -81,39 +95,44 @@ class GoogleCalendarService {
 		}
 	}
 
-	public async getEvents(searchName: string, maxResults: number = 10): Promise<CalendarEvent[]> {
+	public async getEvents(searchName: string): Promise<CalendarEvent[]> {
 		try {
 			const request = {
 				calendarId: "primary",
 				showDeleted: false,
 				singleEvents: true,
 				q: searchName,
-				maxResults: maxResults,
+				maxResults: 2000,
 				orderBy: "updated",
 			};
 
 			const response = await gapi.client.calendar.events.list(request);
 			const events = response.result.items as any[];
 
-			if (!events || events.length === 0) {
+			const filteredEvents = events.filter(event => 
+				event.summary && event.summary.toLowerCase().includes(searchName.toLowerCase())
+			  );
+
+			if (!filteredEvents || filteredEvents.length === 0) {
 				return [];
 			}
 
-			return events.map((event) => {
-				const startDateTime = event.start.dateTime ? new Date(event.start.dateTime) : null;
-				const endDateTime = event.end.dateTime ? new Date(event.end.dateTime) : null;
-
-				let duration = 0;
-				if (startDateTime && endDateTime) {
-					duration = (endDateTime.getTime() - startDateTime.getTime()) / (1000 * 60 * 60); // Convert ms to hours
-				}
+			return filteredEvents.map((event) => {
+				const { hours, minutes } = calculateDuration(
+					event.start.dateTime || event.start.date,
+					event.end.dateTime || event.end.date
+				);
 
 				return {
 					id: event.id,
 					summary: event.summary,
 					start: event.start,
 					end: event.end,
-					duration: parseFloat(duration.toFixed(2)),
+					duration: {
+						hours,
+						minutes,
+					},
+					description: event.description || ""
 				};
 			});
 		} catch (error) {

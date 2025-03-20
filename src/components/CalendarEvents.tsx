@@ -3,12 +3,12 @@ import { calendarService } from "../services/GoogleCalendarService";
 import { CalendarEvent } from "../types/google-calendar";
 
 interface CalendarEventsProps {
-	searchEventName?: string;
+	searchQuery?: string;
 }
 
-export function CalendarEvents({ searchEventName }: CalendarEventsProps) {
+export function CalendarEvents({ searchQuery }: CalendarEventsProps) {
 	const [events, setEvents] = useState<CalendarEvent[]>([]);
-	const [totalHours, setTotalHours] = useState<number | null>(null);
+	const [totalTime, setTotalTime] = useState<{ hours: number; minutes: number } | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
@@ -17,16 +17,18 @@ export function CalendarEvents({ searchEventName }: CalendarEventsProps) {
 			try {
 				setLoading(true);
 
-				if (searchEventName) {
-					const events = await calendarService.getEvents(searchEventName, 100);
+				if (searchQuery) {
+					const events = await calendarService.getEvents(searchQuery);
+					console.log(events);
+
 					setEvents(events);
-					let sum = 0;
+					let totalMinutes = 0; // Cumulative total of minutes, to be converted after
 					for (const e of events) {
 						if (e.duration) {
-							sum += e.duration;
+							totalMinutes += e.duration.hours * 60 + e.duration.minutes;
 						}
 					}
-					setTotalHours(parseFloat(sum.toFixed(2)));
+					setTotalTime({ hours: Math.floor(totalMinutes / 60), minutes: totalMinutes % 60 });
 				}
 
 				setError(null);
@@ -39,7 +41,7 @@ export function CalendarEvents({ searchEventName }: CalendarEventsProps) {
 		};
 
 		fetchEvents();
-	}, [searchEventName]);
+	}, [searchQuery]);
 
 	if (loading) {
 		return <div>Loading calendar events...</div>;
@@ -50,17 +52,31 @@ export function CalendarEvents({ searchEventName }: CalendarEventsProps) {
 	}
 
 	if (events.length === 0) {
-		return <div>No upcoming events found in your calendar.</div>;
+		return <div>No events found for {searchQuery}</div>;
 	}
 
 	return (
 		<div className="calendar-events">
 			<h2>Upcoming Events</h2>
 
-			{searchEventName && (
+			{searchQuery && (
 				<div className="event-stats">
-					<h3>Stats for "{searchEventName}"</h3>
-					<p>Total hours: {totalHours !== null ? `${totalHours} hours` : "Calculating..."}</p>
+					<h3>
+						Stats for <em>{searchQuery}</em>
+					</h3>
+					<p>
+						Total Time:{" "}
+						{totalTime !== null
+							? totalTime.hours > 0
+								? ` ${totalTime.hours} hour${totalTime.hours == 1 ? "" : "s"}`
+								: ""
+							: "Calculating..."}{" "}
+						{totalTime !== null
+							? totalTime.minutes > 0
+								? ` ${totalTime.minutes} minute${totalTime.minutes == 1 ? "" : "s"}`
+								: ""
+							: "Calculating..."}
+					</p>
 				</div>
 			)}
 
@@ -69,7 +85,16 @@ export function CalendarEvents({ searchEventName }: CalendarEventsProps) {
 					<li key={event.id} className="event-item">
 						<div className="event-summary">{event.summary}</div>
 						<div className="event-time">{event.start.dateTime ? new Date(event.start.dateTime).toLocaleString() : event.start.date}</div>
-						{event.duration !== undefined && <div className="event-duration">{event.duration} hours</div>}
+						{event.duration !== undefined && (
+							<div className="event-duration">
+								{event.duration.hours == 24
+									? "All Day"
+									: event.duration.hours > 0
+									? ` ${event.duration.hours} hour${event.duration.hours == 1 ? "" : "s"}`
+									: ""}
+								{event.duration.minutes > 0 ? ` ${event.duration.minutes} minute${event.duration.minutes == 1 ? "" : "s"}` : ""}
+							</div>
+						)}
 					</li>
 				))}
 			</ul>

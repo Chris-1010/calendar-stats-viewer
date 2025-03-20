@@ -9,5 +9,9 @@ export interface CalendarEvent {
 	  dateTime?: string;
 	  date?: string;
 	};
-	duration?: number;
+	duration?: {
+		hours: number,
+		minutes: number
+	},
+	description?: string;
   }
