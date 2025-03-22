@@ -20,30 +20,35 @@ function App() {
 	if (!isSignedIn)
 		return (
 			<div className="login-container">
-				<h1>Login to Continue</h1>
+				<h1>Google Calendar Statistics Viewer</h1>
+				<h2>Login to Continue</h2>
 				<GoogleAuth onSignInChange={handleSignInChange} />
 			</div>
 		);
 
 	return (
-		<main className="calendar-container">
-			<h1>Google Calendar Statistics Viewer</h1>
-			<GoogleAuth onSignInChange={handleSignInChange} />
+		<>
+			<header>
+				<h1>Google Calendar Statistics Viewer</h1>
+				<GoogleAuth onSignInChange={handleSignInChange} />
+			</header>
+			<main className="calendar-container">
+				<div className="search-container">
+					<form onSubmit={handleSearchSubmit}>
+						<input
+							type="text"
+							value={searchEvent}
+							onChange={(e) => setSearchEvent(e.target.value)}
+							placeholder="Search for an event name to calculate total hours"
+						/>
+						<button type="submit">Calculate Hours</button>
+					</form>
+				</div>
 
-			<div className="search-container">
-				<form onSubmit={handleSearchSubmit}>
-					<input
-						type="text"
-						value={searchEvent}
-						onChange={(e) => setSearchEvent(e.target.value)}
-						placeholder="Search for an event name to calculate total hours"
-					/>
-					<button type="submit">Calculate Hours</button>
-				</form>
-			</div>
-
-			<CalendarEvents searchQuery={searchSubmitted} />
-		</main>
+				<CalendarEvents searchQuery={searchSubmitted} />
+			</main>
+			<footer></footer>
+		</>
 	);
 }
 

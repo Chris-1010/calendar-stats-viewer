@@ -57,26 +57,34 @@ export function CalendarEvents({ searchQuery }: CalendarEventsProps) {
 
 	return (
 		<div className="calendar-events">
-			<h2>Upcoming Events</h2>
-
 			{searchQuery && (
 				<div className="event-stats">
 					<h3>
-						Stats for <em>{searchQuery}</em>
+						Stats for <strong>{searchQuery}</strong>
 					</h3>
-					<p>
-						Total Time:{" "}
-						{totalTime !== null
-							? totalTime.hours > 0
-								? ` ${totalTime.hours} hour${totalTime.hours == 1 ? "" : "s"}`
-								: ""
-							: "Calculating..."}{" "}
-						{totalTime !== null
-							? totalTime.minutes > 0
-								? ` ${totalTime.minutes} minute${totalTime.minutes == 1 ? "" : "s"}`
-								: ""
-							: "Calculating..."}
-					</p>
+					<table>
+						<tbody>
+							<tr>
+								<th>Events</th>
+								<td>{events.length}</td>
+							</tr>
+							<tr>
+								<th>Total Time</th>
+								<td>
+									{totalTime !== null
+										? totalTime.hours > 0
+											? ` ${totalTime.hours} hour${totalTime.hours == 1 ? "" : "s"}`
+											: ""
+										: "Calculating..."}{" "}
+									{totalTime !== null
+										? totalTime.minutes > 0
+											? ` ${totalTime.minutes} minute${totalTime.minutes == 1 ? "" : "s"}`
+											: ""
+										: "Calculating..."}
+								</td>
+							</tr>
+						</tbody>
+					</table>
 				</div>
 			)}
 
@@ -84,7 +92,43 @@ export function CalendarEvents({ searchQuery }: CalendarEventsProps) {
 				{events.map((event) => (
 					<li key={event.id} className="event-item">
 						<div className="event-summary">{event.summary}</div>
-						<div className="event-time">{event.start.dateTime ? new Date(event.start.dateTime).toLocaleString() : event.start.date}</div>
+						<div className="event-time">
+							{event.start.dateTime
+								? (() => {
+										// Parse dates while preserving the timezone
+										const startDate = new Date(event.start.dateTime);
+										const endDate = new Date(event.end.dateTime as string);
+										const currentYear = new Date().getFullYear();
+
+										// Format helpers
+										const formatTime = (date: Date) => {
+											const hours = date.getHours() % 12 || 12;
+											const minutes = date.getMinutes();
+											const ampm = date.getHours() >= 12 ? "pm" : "am";
+											return `${hours}${minutes > 0 ? ":" + String(minutes).padStart(2, "0") : ""}${ampm}`;
+										};
+
+										const formatDate = (date: Date) => {
+											const showYear = date.getFullYear() !== currentYear;
+											return date.toLocaleDateString("en-US", {
+												month: "short",
+												day: "numeric",
+												year: showYear ? "numeric" : undefined,
+											});
+										};
+
+										// Check if same day
+										const sameDay = startDate.toDateString() === endDate.toDateString();
+
+										return (
+											<>
+												{formatDate(startDate)} {formatTime(startDate)} — {!sameDay ? `${formatDate(endDate)} ` : ""}
+												{formatTime(endDate)}
+											</>
+										);
+								  })()
+								: event.start.date}
+						</div>
 						{event.duration !== undefined && (
 							<div className="event-duration">
 								{event.duration.hours == 24
