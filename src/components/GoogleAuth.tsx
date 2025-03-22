@@ -15,17 +15,24 @@ export function GoogleAuth({ onSignInChange }: GoogleAuthProps) {
         await calendarService.init();
         setIsInitialized(true);
         
-        // Check if user is already signed in
-        const signedIn = calendarService.isSignedIn();
+        // First check for saved token
+        let signedIn = calendarService.loadAuthState();
+        
+        // If no stored token, check if current session is authenticated
+        if (!signedIn) {
+          signedIn = calendarService.isSignedIn();
+        }
+        
         setIsSignedIn(signedIn);
         onSignInChange(signedIn);
       } catch (error) {
         console.error('Failed to initialize Google API:', error);
       }
     };
-
+  
     initGoogleApi();
   }, [onSignInChange]);
+  
 
   const handleAuthClick = async () => {
     try {

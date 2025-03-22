@@ -5,20 +5,20 @@ const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID as string;
 const DISCOVERY_DOC = "https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest";
 const SCOPES = "https://www.googleapis.com/auth/calendar.readonly";
 
-function calculateDuration(start: string, end: string): { hours: number, minutes: number } {
+function calculateDuration(start: string, end: string): { hours: number; minutes: number } {
 	// Parse the ISO datetime strings into Date objects
 	const startDate = new Date(start);
 	const endDate = new Date(end);
-	
+
 	// Calculate difference in milliseconds
 	const diffMs = endDate.getTime() - startDate.getTime();
-	
+
 	// Convert to hours and minutes
 	const hours = Math.floor(diffMs / (1000 * 60 * 60));
 	const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-	
+
 	return { hours, minutes };
-  }
+}
 class GoogleCalendarService {
 	private gapiInited = false;
 	private gisInited = false;
@@ -70,12 +70,12 @@ class GoogleCalendarService {
 		}
 
 		return new Promise((resolve, reject) => {
-			// Using the original approach but with type assertion
 			(this.tokenClient as any).callback = (resp: any) => {
 				if (resp.error !== undefined) {
 					reject(resp);
 					return;
 				}
+				this.saveAuthState(); // Save auth state after successful login
 				resolve();
 			};
 
@@ -87,11 +87,34 @@ class GoogleCalendarService {
 		});
 	}
 
+	public saveAuthState(): void {
+		const token = gapi.client.getToken();
+		if (token) {
+			localStorage.setItem("googleAuthToken", JSON.stringify(token));
+		}
+	}
+
+	public loadAuthState(): boolean {
+		const savedToken = localStorage.getItem("googleAuthToken");
+		if (savedToken) {
+			try {
+				const token = JSON.parse(savedToken);
+				gapi.client.setToken(token);
+				return true;
+			} catch (e) {
+				console.error("Failed to parse saved token", e);
+				localStorage.removeItem("googleAuthToken");
+			}
+		}
+		return false;
+	}
+
 	public signOut(): void {
 		const token = gapi.client.getToken();
 		if (token !== null) {
 			google.accounts.oauth2.revoke(token.access_token, () => {});
 			gapi.client.setToken(null);
+			localStorage.removeItem("googleAuthToken");
 		}
 	}
 
@@ -109,19 +132,14 @@ class GoogleCalendarService {
 			const response = await gapi.client.calendar.events.list(request);
 			const events = response.result.items as any[];
 
-			const filteredEvents = events.filter(event => 
-				event.summary && event.summary.toLowerCase().includes(searchName.toLowerCase())
-			  );
+			const filteredEvents = events.filter((event) => event.summary && event.summary.toLowerCase().includes(searchName.toLowerCase()));
 
 			if (!filteredEvents || filteredEvents.length === 0) {
 				return [];
 			}
 
 			return filteredEvents.map((event) => {
-				const { hours, minutes } = calculateDuration(
-					event.start.dateTime || event.start.date,
-					event.end.dateTime || event.end.date
-				);
+				const { hours, minutes } = calculateDuration(event.start.dateTime || event.start.date, event.end.dateTime || event.end.date);
 
 				return {
 					id: event.id,
@@ -132,7 +150,7 @@ class GoogleCalendarService {
 						hours,
 						minutes,
 					},
-					description: event.description || ""
+					description: event.description || "",
 				};
 			});
 		} catch (error) {
