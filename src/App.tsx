@@ -27,7 +27,7 @@ function App() {
 
 	return (
 		<main className="calendar-container">
-			<h1>Google Calendar Integration</h1>
+			<h1>Google Calendar Statistics Viewer</h1>
 			<GoogleAuth onSignInChange={handleSignInChange} />
 
 			<div className="search-container">

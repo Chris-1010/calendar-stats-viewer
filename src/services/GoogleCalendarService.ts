@@ -3,7 +3,7 @@ import { CalendarEvent } from "../types/google-calendar";
 const API_KEY = import.meta.env.VITE_GOOGLE_API_KEY as string;
 const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID as string;
 const DISCOVERY_DOC = "https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest";
-const SCOPES = "https://www.googleapis.com/auth/calendar.readonly";
+const SCOPES = "https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/userinfo.profile";
 
 function calculateDuration(start: string, end: string): { hours: number; minutes: number } {
 	// Parse the ISO datetime strings into Date objects
@@ -85,6 +85,26 @@ class GoogleCalendarService {
 				this.tokenClient!.requestAccessToken({ prompt: "" });
 			}
 		});
+	}
+
+	public async getUserInfo(): Promise<{ name: string; email: string; imageUrl?: string }> {
+		try {
+			// Make a request to Google's userinfo endpoint
+			const response = await gapi.client.request({
+				path: "https://www.googleapis.com/oauth2/v2/userinfo",
+				method: "GET",
+			});
+
+			const userInfo = response.result;
+			return {
+				name: userInfo.name,
+				email: userInfo.email,
+				imageUrl: userInfo.picture,
+			};
+		} catch (error) {
+			console.error("Error fetching user info:", error);
+			throw error;
+		}
 	}
 
 	public saveAuthState(): void {
