@@ -41,7 +41,7 @@ function App() {
 							onChange={(e) => setSearchEvent(e.target.value)}
 							placeholder="Search for an event name to calculate total hours"
 						/>
-						<button type="submit">Calculate Hours</button>
+						<button type="submit">Find Events</button>
 					</form>
 				</div>
 

@@ -78,7 +78,11 @@ export function GoogleAuth({ onSignInChange }: GoogleAuthProps) {
 			{userInfo && isSignedIn && (
 				<div className="user-info">
 					{userInfo.imageUrl && <img src={userInfo.imageUrl} alt={`${userInfo.name}'s profile`} className="user-avatar" />}
-					<span className="user-name">Welcome, {userInfo.name}</span>
+					<span className="user-name">
+						Welcome
+						<br />
+						<strong>{userInfo.name}</strong>
+					</span>
 				</div>
 			)}
 

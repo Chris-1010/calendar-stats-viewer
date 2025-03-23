@@ -1,16 +1,57 @@
-import { useEffect, useState } from "react";
+import { JSX, useEffect, useState } from "react";
 import { calendarService } from "../services/GoogleCalendarService";
 import { CalendarEvent } from "../types/google-calendar";
+import { AlignJustify as DescriptionIcon } from "lucide-react";
 
 interface CalendarEventsProps {
 	searchQuery?: string;
 }
 
+const formatEventTime = (startDateTime: string, endDateTime: string): JSX.Element => {
+	// Parse dates while preserving the timezone
+	const startDate = new Date(startDateTime);
+	const endDate = new Date(endDateTime);
+	const currentYear = new Date().getFullYear();
+
+	// Format helpers
+	const formatTime = (date: Date) => {
+		const hours = date.getHours() % 12 || 12;
+		const minutes = date.getMinutes();
+		const ampm = date.getHours() >= 12 ? "pm" : "am";
+		return `${hours}${minutes > 0 ? ":" + String(minutes).padStart(2, "0") : ""}${ampm}`;
+	};
+
+	const formatDate = (date: Date) => {
+		const showYear = date.getFullYear() !== currentYear;
+		return date.toLocaleDateString("en-US", {
+			month: "short",
+			day: "numeric",
+			year: showYear ? "numeric" : undefined,
+		});
+	};
+
+	// Check if same day
+	const sameDay = startDate.toDateString() === endDate.toDateString();
+
+	return (
+		<>
+			{formatDate(startDate)} {formatTime(startDate)} — {!sameDay ? `${formatDate(endDate)} ` : ""}
+			{formatTime(endDate)}
+		</>
+	);
+};
+
 export function CalendarEvents({ searchQuery }: CalendarEventsProps) {
 	const [events, setEvents] = useState<CalendarEvent[]>([]);
+	const [clickedEvent, setClickedEvent] = useState<CalendarEvent | null>(null);
 	const [totalTime, setTotalTime] = useState<{ hours: number; minutes: number } | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
+
+	const displayDescription = (event: CalendarEvent) => {
+		clickedEvent && clickedEvent.id === event.id ? setClickedEvent(null) : setClickedEvent(event);
+		console.log(event);
+	};
 
 	useEffect(() => {
 		const fetchEvents = async () => {
@@ -48,7 +89,7 @@ export function CalendarEvents({ searchQuery }: CalendarEventsProps) {
 	}
 
 	if (error) {
-		return <div className="error">{error}</div>;
+		return <div className="error">{error} Sign Out and Back In</div>;
 	}
 
 	if (events.length === 0) {
@@ -58,76 +99,74 @@ export function CalendarEvents({ searchQuery }: CalendarEventsProps) {
 	return (
 		<div className="calendar-events">
 			{searchQuery && (
-				<div className="event-stats">
-					<h3>
-						Stats for <strong>{searchQuery}</strong>
-					</h3>
-					<table>
-						<tbody>
-							<tr>
-								<th>Events</th>
-								<td>{events.length}</td>
-							</tr>
-							<tr>
-								<th>Total Time</th>
-								<td>
-									{totalTime !== null
-										? totalTime.hours > 0
-											? ` ${totalTime.hours} hour${totalTime.hours == 1 ? "" : "s"}`
-											: ""
-										: "Calculating..."}{" "}
-									{totalTime !== null
-										? totalTime.minutes > 0
-											? ` ${totalTime.minutes} minute${totalTime.minutes == 1 ? "" : "s"}`
-											: ""
-										: "Calculating..."}
-								</td>
-							</tr>
-						</tbody>
-					</table>
+				<div className="events-details">
+					<div className="events-stats">
+						<h3>
+							Stats for <strong>{searchQuery}</strong>
+						</h3>
+						<table>
+							<tbody>
+								<tr>
+									<th>Events</th>
+									<td>{events.length}</td>
+								</tr>
+								<tr>
+									<th>Total Time</th>
+									<td>
+										{totalTime !== null
+											? totalTime.hours > 0
+												? ` ${totalTime.hours} hour${totalTime.hours == 1 ? "" : "s"}`
+												: ""
+											: "Calculating..."}{" "}
+										{totalTime !== null
+											? totalTime.minutes > 0
+												? ` ${totalTime.minutes} minute${totalTime.minutes == 1 ? "" : "s"}`
+												: ""
+											: "Calculating..."}
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					{clickedEvent && (
+						<div className="clickedEventDetails">
+							<h1>{clickedEvent.summary}</h1>
+							<div className="event-time">
+								{clickedEvent.start.dateTime
+									? formatEventTime(clickedEvent.start.dateTime, clickedEvent.end.dateTime as string)
+									: clickedEvent.start.date}
+							</div>
+							{clickedEvent.duration !== undefined && (
+								<div className="event-duration">
+									{clickedEvent.duration.hours == 24
+										? "All Day"
+										: clickedEvent.duration.hours > 0
+										? ` ${clickedEvent.duration.hours} hour${clickedEvent.duration.hours == 1 ? "" : "s"}`
+										: ""}
+									{clickedEvent.duration.minutes > 0
+										? ` ${clickedEvent.duration.minutes} minute${clickedEvent.duration.minutes == 1 ? "" : "s"}`
+										: ""}
+								</div>
+							)}
+							<div className="event-description">
+								<h3>Description</h3>
+								<p>{clickedEvent.description}</p>
+							</div>
+						</div>
+					)}
 				</div>
 			)}
 
 			<ul className="events-list">
 				{events.map((event) => (
-					<li key={event.id} className="event-item">
+					<li
+						key={event.id}
+						className={`event-item ${clickedEvent && clickedEvent.id === event.id ? "toggled" : ""}`}
+						onClick={event.description ? () => displayDescription(event) : undefined}
+					>
 						<div className="event-summary">{event.summary}</div>
 						<div className="event-time">
-							{event.start.dateTime
-								? (() => {
-										// Parse dates while preserving the timezone
-										const startDate = new Date(event.start.dateTime);
-										const endDate = new Date(event.end.dateTime as string);
-										const currentYear = new Date().getFullYear();
-
-										// Format helpers
-										const formatTime = (date: Date) => {
-											const hours = date.getHours() % 12 || 12;
-											const minutes = date.getMinutes();
-											const ampm = date.getHours() >= 12 ? "pm" : "am";
-											return `${hours}${minutes > 0 ? ":" + String(minutes).padStart(2, "0") : ""}${ampm}`;
-										};
-
-										const formatDate = (date: Date) => {
-											const showYear = date.getFullYear() !== currentYear;
-											return date.toLocaleDateString("en-US", {
-												month: "short",
-												day: "numeric",
-												year: showYear ? "numeric" : undefined,
-											});
-										};
-
-										// Check if same day
-										const sameDay = startDate.toDateString() === endDate.toDateString();
-
-										return (
-											<>
-												{formatDate(startDate)} {formatTime(startDate)} — {!sameDay ? `${formatDate(endDate)} ` : ""}
-												{formatTime(endDate)}
-											</>
-										);
-								  })()
-								: event.start.date}
+							{event.start.dateTime ? formatEventTime(event.start.dateTime, event.end.dateTime as string) : event.start.date}
 						</div>
 						{event.duration !== undefined && (
 							<div className="event-duration">
@@ -138,6 +177,14 @@ export function CalendarEvents({ searchQuery }: CalendarEventsProps) {
 									: ""}
 								{event.duration.minutes > 0 ? ` ${event.duration.minutes} minute${event.duration.minutes == 1 ? "" : "s"}` : ""}
 							</div>
+						)}
+						{event.description ? (
+							<div className="descBrief">
+								<DescriptionIcon />
+								{event.description.length} characters
+							</div>
+						) : (
+							""
 						)}
 					</li>
 				))}
