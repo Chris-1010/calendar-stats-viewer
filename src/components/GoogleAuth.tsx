@@ -65,8 +65,8 @@ export function GoogleAuth({ onSignInChange }: GoogleAuthProps) {
 	const handleSignoutClick = () => {
 		calendarService.signOut();
 		setIsSignedIn(false);
-    onSignInChange(false);
-    setUserInfo(null);
+		onSignInChange(false);
+		setUserInfo(null);
 	};
 
 	if (!isInitialized) {
@@ -74,31 +74,25 @@ export function GoogleAuth({ onSignInChange }: GoogleAuthProps) {
 	}
 
 	return (
-    <div className="google-auth">
-      {userInfo && isSignedIn && (
-        <div className="user-info">
-          {userInfo.imageUrl && (
-            <img 
-              src={userInfo.imageUrl} 
-              alt={`${userInfo.name}'s profile`} 
-              className="user-avatar" 
-            />
-          )}
-          <span className="user-name">Welcome, {userInfo.name}</span>
-        </div>
-      )}
-      
-      <div className="google-auth-buttons">
-        {!isSignedIn ? (
-          <button onClick={handleAuthClick} className="auth-button">
-            Sign in with Google Calendar
-          </button>
-        ) : (
-          <button onClick={handleSignoutClick} className="auth-button signout">
-            Sign Out
-          </button>
-        )}
-      </div>
-    </div>
-  );
+		<div className="google-auth">
+			{userInfo && isSignedIn && (
+				<div className="user-info">
+					{userInfo.imageUrl && <img src={userInfo.imageUrl} alt={`${userInfo.name}'s profile`} className="user-avatar" />}
+					<span className="user-name">Welcome, {userInfo.name}</span>
+				</div>
+			)}
+
+			<div className="google-auth-buttons">
+				{!isSignedIn ? (
+					<button onClick={handleAuthClick} className="auth-button">
+						Sign in with Google Calendar
+					</button>
+				) : (
+					<button onClick={handleSignoutClick} className={`auth-button signout ${!userInfo ? "tokenError" : ""}`}>
+						Sign Out
+					</button>
+				)}
+			</div>
+		</div>
+	);
 }

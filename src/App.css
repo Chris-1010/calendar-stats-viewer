@@ -14,7 +14,6 @@ div#root {
 body {
 }
 
-
 /* #region header & login-container */
 
 .login-container {
@@ -23,7 +22,7 @@ body {
 	width: 100vw;
 	height: 100vh;
 	gap: 5vh;
-	font-size: calc((3vh + 3vw)/2);
+	font-size: calc((3vh + 3vw) / 2);
 }
 
 .login-container > h1 {
@@ -94,7 +93,8 @@ header > .google-auth {
 .auth-button.signout:hover {
 	background-color: red;
 }
-.google-auth:hover .auth-button.signout {
+.google-auth:hover .auth-button.signout,
+.auth-button.signout.tokenError {
 	bottom: -20%;
 	opacity: 100%;
 }
@@ -107,7 +107,6 @@ main {
 }
 
 /* #region main > search */
-
 
 .search-container {
 	margin: 20px auto;
@@ -199,21 +198,21 @@ strong {
 
 ::-webkit-scrollbar {
 	width: 6px;
-  }
-  
-  ::-webkit-scrollbar-track {
+}
+
+::-webkit-scrollbar-track {
 	background: white;
 	border-radius: 5px;
-  }
-  
-  ::-webkit-scrollbar-thumb {
+}
+
+::-webkit-scrollbar-thumb {
 	background: blue;
 	border-radius: 5px;
-  }
-  
-  ::-webkit-scrollbar-thumb:hover {
+}
+
+::-webkit-scrollbar-thumb:hover {
 	background: red;
-  }
+}
 
 /* #endregion */
 
