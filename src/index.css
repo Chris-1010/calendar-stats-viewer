@@ -5,7 +5,7 @@
 
 	color-scheme: light dark;
 	color: rgba(255, 255, 255, 0.87);
-	background-image: url(/public/calendar.svg);
+	background-image: url(/calendar.svg);
 	background-repeat: space;
   background-attachment: fixed;
 	background-color: #210c2a;
@@ -15,9 +15,10 @@
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 
-	--secondary: #6a0062;
+	--secondary: linear-gradient(45deg, #6a0062, #2638d9);
 	--secondary-2: #d99926;
-	--tertiary: #9926d9;
+	--tertiary: linear-gradient(45deg, #9926d9, #268ed9);
+  --tertiary-2: #9926d9;
 	--error: #db4437;
 }
 
