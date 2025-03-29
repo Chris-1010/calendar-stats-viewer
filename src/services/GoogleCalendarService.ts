@@ -152,13 +152,11 @@ class GoogleCalendarService {
 			const response = await gapi.client.calendar.events.list(request);
 			const events = response.result.items as any[];
 
-			const filteredEvents = events.filter((event) => event.summary && event.summary.toLowerCase().includes(searchName.toLowerCase()));
-
-			if (!filteredEvents || filteredEvents.length === 0) {
+			if (!events || events.length === 0) {
 				return [];
 			}
 
-			return filteredEvents.map((event) => {
+			return events.map((event) => {
 
 				const { hours, minutes } = calculateDuration(event.start.dateTime || event.start.date, event.end.dateTime || event.end.date);
 

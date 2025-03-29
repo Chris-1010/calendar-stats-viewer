@@ -6,6 +6,7 @@ import { AlignJustify as DescriptionIcon } from "lucide-react";
 interface CalendarEventsProps {
 	userEmail: string | null,
 	searchQuery?: string;
+	searchTitlesOnly?: boolean;
 }
 
 const formatEventTime = (startDateTime: string, endDateTime: string): JSX.Element => {
@@ -42,7 +43,7 @@ const formatEventTime = (startDateTime: string, endDateTime: string): JSX.Elemen
 	);
 };
 
-export function CalendarEvents({ userEmail, searchQuery }: CalendarEventsProps) {
+export function CalendarEvents({ userEmail, searchQuery, searchTitlesOnly }: CalendarEventsProps) {
 	const [events, setEvents] = useState<CalendarEvent[]>([]);
 	const [clickedEvent, setClickedEvent] = useState<CalendarEvent | null>(null);
 	const [totalTime, setTotalTime] = useState<{ hours: number; minutes: number } | null>(null);
@@ -61,7 +62,15 @@ export function CalendarEvents({ userEmail, searchQuery }: CalendarEventsProps) 
 				if (searchQuery) {
 					const events = await calendarService.getEvents(searchQuery);
 
-					setEvents(events);
+					// Apply filter only if searchTitlesOnly is true
+					const filteredResults = searchTitlesOnly 
+					? events.filter((event) => 
+						event.summary && event.summary.toLowerCase().includes(searchQuery.toLowerCase())
+					  )
+						: events;
+					
+					setEvents(filteredResults);
+
 					let totalMinutes = 0; // Cumulative total of minutes, to be converted after
 					for (const e of events) {
 						if (e.duration) {
@@ -81,7 +90,7 @@ export function CalendarEvents({ userEmail, searchQuery }: CalendarEventsProps) 
 		};
 
 		fetchEvents();
-	}, [searchQuery]);
+	}, [searchQuery, searchTitlesOnly]);
 
 	if (loading) {
 		return <div>Loading calendar events...</div>;

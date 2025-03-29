@@ -8,6 +8,7 @@ function App() {
 	const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
 	const [searchEvent, setSearchEvent] = useState("");
 	const [searchSubmitted, setSearchSubmitted] = useState("");
+	const [searchTitlesOnly, setSearchTitlesOnly] = useState(true);
 
 	const handleSignInChange = (signedIn: boolean, userInfo: UserInfo | null) => {
 		setIsSignedIn(signedIn);
@@ -37,12 +38,18 @@ function App() {
 			<main className="calendar-container">
 				<div className="search-container">
 					<form onSubmit={handleSearchSubmit}>
-						<input type="text" value={searchEvent} onChange={(e) => setSearchEvent(e.target.value)} placeholder="Search for events" />
+						<div className="search">
+							<input type="text" value={searchEvent} onChange={(e) => setSearchEvent(e.target.value)} placeholder="Search for events" />
+							<label>
+								<input type="checkbox" checked={searchTitlesOnly} onChange={(e) => setSearchTitlesOnly(e.target.checked)} />
+								Search titles only
+							</label>
+						</div>
 						<button type="submit">Find Events</button>
 					</form>
 				</div>
 
-				<CalendarEvents userEmail={userInfo ? userInfo.email : null} searchQuery={searchSubmitted} />
+				<CalendarEvents userEmail={userInfo ? userInfo.email : null} searchQuery={searchSubmitted} searchTitlesOnly={searchTitlesOnly} />
 			</main>
 			<footer></footer>
 		</>
