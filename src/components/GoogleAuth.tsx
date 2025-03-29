@@ -2,10 +2,10 @@ import { useEffect, useState } from "react";
 import { calendarService } from "../services/GoogleCalendarService";
 
 interface GoogleAuthProps {
-	onSignInChange: (isSignedIn: boolean) => void;
+	onSignInChange: (isSignedIn: boolean, userInfo: UserInfo | null) => void;
 }
 
-interface UserInfo {
+export interface UserInfo {
 	name: string;
 	email: string;
 	imageUrl?: string;
@@ -31,7 +31,6 @@ export function GoogleAuth({ onSignInChange }: GoogleAuthProps) {
 				}
 
 				setIsSignedIn(signedIn);
-				onSignInChange(signedIn);
 
 				if (signedIn) {
 					try {
@@ -41,6 +40,8 @@ export function GoogleAuth({ onSignInChange }: GoogleAuthProps) {
 						console.error("Error fetching user info:", err);
 					}
 				}
+
+				onSignInChange(signedIn, userInfo);
 			} catch (error) {
 				console.error("Failed to initialize Google API:", error);
 			}
@@ -53,7 +54,7 @@ export function GoogleAuth({ onSignInChange }: GoogleAuthProps) {
 		try {
 			await calendarService.signIn();
 			setIsSignedIn(true);
-			onSignInChange(true);
+			onSignInChange(true, userInfo);
 
 			const info = await calendarService.getUserInfo();
 			setUserInfo(info);
@@ -65,7 +66,7 @@ export function GoogleAuth({ onSignInChange }: GoogleAuthProps) {
 	const handleSignoutClick = () => {
 		calendarService.signOut();
 		setIsSignedIn(false);
-		onSignInChange(false);
+		onSignInChange(false, null);
 		setUserInfo(null);
 	};
 
@@ -89,7 +90,7 @@ export function GoogleAuth({ onSignInChange }: GoogleAuthProps) {
 			<div className="google-auth-buttons">
 				{!isSignedIn ? (
 					<button onClick={handleAuthClick} className="auth-button">
-						Sign in with Google Calendar
+						Sign In
 					</button>
 				) : (
 					<button onClick={handleSignoutClick} className={`auth-button signout ${!userInfo ? "tokenError" : ""}`}>

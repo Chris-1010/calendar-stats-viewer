@@ -1,15 +1,17 @@
 import { useState } from "react";
 import "./App.css";
-import { GoogleAuth } from "./components/GoogleAuth";
+import { GoogleAuth, UserInfo } from "./components/GoogleAuth";
 import { CalendarEvents } from "./components/CalendarEvents";
 
 function App() {
 	const [isSignedIn, setIsSignedIn] = useState(false);
+	const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
 	const [searchEvent, setSearchEvent] = useState("");
 	const [searchSubmitted, setSearchSubmitted] = useState("");
 
-	const handleSignInChange = (signedIn: boolean) => {
+	const handleSignInChange = (signedIn: boolean, userInfo: UserInfo | null) => {
 		setIsSignedIn(signedIn);
+		setUserInfo(userInfo);
 	};
 
 	const handleSearchSubmit = (e: React.FormEvent) => {
@@ -35,17 +37,12 @@ function App() {
 			<main className="calendar-container">
 				<div className="search-container">
 					<form onSubmit={handleSearchSubmit}>
-						<input
-							type="text"
-							value={searchEvent}
-							onChange={(e) => setSearchEvent(e.target.value)}
-							placeholder="Search for an event name to calculate total hours"
-						/>
+						<input type="text" value={searchEvent} onChange={(e) => setSearchEvent(e.target.value)} placeholder="Search for events" />
 						<button type="submit">Find Events</button>
 					</form>
 				</div>
 
-				<CalendarEvents searchQuery={searchSubmitted} />
+				<CalendarEvents userEmail={userInfo ? userInfo.email : null} searchQuery={searchSubmitted} />
 			</main>
 			<footer></footer>
 		</>

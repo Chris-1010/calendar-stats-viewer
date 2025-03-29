@@ -159,6 +159,7 @@ class GoogleCalendarService {
 			}
 
 			return filteredEvents.map((event) => {
+
 				const { hours, minutes } = calculateDuration(event.start.dateTime || event.start.date, event.end.dateTime || event.end.date);
 
 				return {
@@ -171,6 +172,7 @@ class GoogleCalendarService {
 						minutes,
 					},
 					description: event.description || "",
+					link: event.htmlLink
 				};
 			});
 		} catch (error) {

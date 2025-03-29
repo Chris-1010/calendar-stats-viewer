@@ -14,4 +14,5 @@ export interface CalendarEvent {
 		minutes: number
 	},
 	description?: string;
+	link: string;
   }

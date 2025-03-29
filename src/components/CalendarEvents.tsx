@@ -4,6 +4,7 @@ import { CalendarEvent } from "../types/google-calendar";
 import { AlignJustify as DescriptionIcon } from "lucide-react";
 
 interface CalendarEventsProps {
+	userEmail: string | null,
 	searchQuery?: string;
 }
 
@@ -41,7 +42,7 @@ const formatEventTime = (startDateTime: string, endDateTime: string): JSX.Elemen
 	);
 };
 
-export function CalendarEvents({ searchQuery }: CalendarEventsProps) {
+export function CalendarEvents({ userEmail, searchQuery }: CalendarEventsProps) {
 	const [events, setEvents] = useState<CalendarEvent[]>([]);
 	const [clickedEvent, setClickedEvent] = useState<CalendarEvent | null>(null);
 	const [totalTime, setTotalTime] = useState<{ hours: number; minutes: number } | null>(null);
@@ -50,7 +51,6 @@ export function CalendarEvents({ searchQuery }: CalendarEventsProps) {
 
 	const displayDescription = (event: CalendarEvent) => {
 		clickedEvent && clickedEvent.id === event.id ? setClickedEvent(null) : setClickedEvent(event);
-		console.log(event);
 	};
 
 	useEffect(() => {
@@ -60,7 +60,6 @@ export function CalendarEvents({ searchQuery }: CalendarEventsProps) {
 
 				if (searchQuery) {
 					const events = await calendarService.getEvents(searchQuery);
-					console.log(events);
 
 					setEvents(events);
 					let totalMinutes = 0; // Cumulative total of minutes, to be converted after
@@ -92,7 +91,7 @@ export function CalendarEvents({ searchQuery }: CalendarEventsProps) {
 		return <div className="error">{error} Sign Out and Back In</div>;
 	}
 
-	if (events.length === 0) {
+	if (searchQuery && events.length === 0) {
 		return <div>No events found for {searchQuery}</div>;
 	}
 
@@ -130,7 +129,7 @@ export function CalendarEvents({ searchQuery }: CalendarEventsProps) {
 					</div>
 					{clickedEvent && (
 						<div className="clickedEventDetails">
-							<h1>{clickedEvent.summary}</h1>
+							<a href={`${clickedEvent.link}${userEmail ? `&authuser=${userEmail}` : ''}`}>{clickedEvent.summary}</a>
 							<div className="event-time">
 								{clickedEvent.start.dateTime
 									? formatEventTime(clickedEvent.start.dateTime, clickedEvent.end.dateTime as string)
@@ -164,7 +163,7 @@ export function CalendarEvents({ searchQuery }: CalendarEventsProps) {
 						className={`event-item ${clickedEvent && clickedEvent.id === event.id ? "toggled" : ""}`}
 						onClick={event.description ? () => displayDescription(event) : undefined}
 					>
-						<div className="event-summary">{event.summary}</div>
+						<a href={event.description ? undefined : `${event.link}${userEmail ? `&authuser=${userEmail}` : ''}`} className="event-summary">{event.summary}</a>
 						<div className="event-time">
 							{event.start.dateTime ? formatEventTime(event.start.dateTime, event.end.dateTime as string) : event.start.date}
 						</div>
