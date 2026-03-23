@@ -79,11 +79,7 @@ class GoogleCalendarService {
 				resolve();
 			};
 
-			if (gapi.client.getToken() === null) {
-				this.tokenClient!.requestAccessToken({ prompt: "consent" });
-			} else {
-				this.tokenClient!.requestAccessToken({ prompt: "" });
-			}
+			this.tokenClient!.requestAccessToken({ prompt: "select_account" });
 		});
 	}
 
