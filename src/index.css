@@ -5,10 +5,7 @@
 
 	color-scheme: light dark;
 	color: rgba(255, 255, 255, 0.87);
-	background-image: url(/calendar.svg);
-	background-repeat: space;
-  background-attachment: fixed;
-	background-color: #210c2a;
+	background-color: #00041a;
 
 	font-synthesis: none;
 	text-rendering: optimizeLegibility;
@@ -18,8 +15,23 @@
 	--secondary: linear-gradient(45deg, #6a0062, #2638d9);
 	--secondary-2: #d99926;
 	--tertiary: linear-gradient(45deg, #9926d9, #268ed9);
-  --tertiary-2: #9926d9;
+	--tertiary-2: #9926d9;
 	--error: #db4437;
+}
+
+body {
+	position: relative;
+	overflow: hidden;
+}
+
+.floating-icons-container {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	z-index: -1;
+	pointer-events: none;
 }
 
 @media (prefers-color-scheme: light) {
